@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx:latest
+    command: ["nginx"]
+    ports:
+    - containerPort: 80
+    env:
+    - name: ENV_VAR
+      value: "value"
+    resources:
+      limits:
+        cpu: "0.5"
+        memory: "512Mi"
+      requests:
+        cpu: "0.25"
+        memory: "256Mi"
+    volumeMounts:
+    - name: my-volume
+      mountPath: /data
+  initContainers:
+  - name: init-container
+    image: busybox:latest
+    command: ["sh", "-c", "echo 'Initializing...'"]
+  volumes:
+  - name: my-volume
+    emptyDir: {}
+  restartPolicy: Always
+  serviceAccountName: my-service-account
+  nodeSelector:
+    kubernetes.io/os: linux
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd
+  tolerations:
+  - key: "key"
+    operator: "Equal"
+    value: "value"
+    effect: "NoSchedule"
